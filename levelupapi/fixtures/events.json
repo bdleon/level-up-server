@@ -1,0 +1,13 @@
+[
+    {
+        "model":"levelupapi.event",
+        "pk":1,
+        "fields":{
+            "game": 1,
+            "description": "Monopoly: Winner gets 100 dollars",
+            "date": "2021-11-29",
+            "time": "09:00:00",
+            "organizer": 1
+        }
+    }
+]
