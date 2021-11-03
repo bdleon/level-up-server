@@ -16,8 +16,8 @@ def login_user(request):
         request -- The full HTTP request object
     """
 
-    username: request.data['username']
-    password: request.data['password']
+    username = request.data['username']
+    password = request.data['password']
 
     # Use the built-in authenticate method to verify
     # authenticate returns the user object or None if no user is found
