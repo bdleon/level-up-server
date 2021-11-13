@@ -7,6 +7,7 @@ from rest_framework import serializers
 from rest_framework import status
 from levelupapi.models import Event, Game, Gamer
 from django.contrib.auth.models import User
+from rest_framework.serializers import BooleanField
 from rest_framework.decorators import action
 
 
@@ -32,10 +33,29 @@ class EventView(ViewSet):
             return Response({"reason": ex.message}, status=status.HTTP_400_BAD_REQUEST)
 
     def list(self, request):
+        """Handle GET requests to events resource
+
+        Returns:
+            Response -- JSON serialized list of events
+        """
+        # Get the current authenticated user
+        gamer = Gamer.objects.get(user=request.auth.user)
         events = Event.objects.all()
+
+        # Set the `joined` property on every event
+        for event in events:
+            # Check to see if the gamer is in the attendees list on the event
+            event.joined = gamer in event.attendees.all()
+
+        # Support filtering events by game
+        game = self.request.query_params.get('gameId', None)
+        if game is not None:
+            events = events.filter(game__id=type)
+
         serializer = EventSerializer(
-            events, context={'request': request}, many=True)
+            events, many=True, context={'request': request})
         return Response(serializer.data)
+
 
     def retrieve(self, request, pk=None):
         try:
@@ -116,9 +136,10 @@ class GamerSerializer(serializers.ModelSerializer):
 
 class EventSerializer(serializers.ModelSerializer):
     organizer = GamerSerializer()
+    joined = serializers.BooleanField(required=False)
 
     class Meta:
         model = Event
         fields = ('id', 'organizer', 'game', 'date',
-                  'time', 'description', 'attendees')
+                  'time', 'description', 'attendees','joined')
         depth = 1
